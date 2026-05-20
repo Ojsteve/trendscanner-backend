@@ -18,5 +18,8 @@
   "bugs": {
     "url": "https://github.com/Ojsteve/trendscanner-backend/issues"
   },
-  "homepage": "https://github.com/Ojsteve/trendscanner-backend#readme"
+  "homepage": "https://github.com/Ojsteve/trendscanner-backend#readme",
+  "dependencies": {
+    "node-telegram-bot-api": "^0.67.0"
+  }
 }
