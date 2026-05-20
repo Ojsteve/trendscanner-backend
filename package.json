@@ -1,5 +1,5 @@
 {
-  "name": "trendscanner_backend",olisa
+  "name": "trendscanner_backend",
   "version": "1.0.0",
   "description": "",
   "main": "server.js",
@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/Ojsteve/trendscanner-backend#readme",
   "dependencies": {
-    "node-telegram-bot-api": "^0.67.0"
+    "cors": "^2.8.5",
+    "express": "^4.21.0"
   }
 }
