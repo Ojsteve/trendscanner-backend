@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrendScanner | Trading Command Center</title>
+    <style>
+        :root {
+            --bg-main: #0B0E14;
+            --bg-card: #151A22;
+            --border-color: #242F3E;
+            --text-main: #E2E8F0;
+            --text-muted: #64748B;
+            --bullish: #10B981;
+            --bearish: #EF4444;
+            --neutral: #334155;
+            --accent: #3B82F6;
+            --alert-bg: #1E1B4B;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+
+        h1 { margin: 0; font-size: 24px; letter-spacing: 0.5px; }
+        .status-badge { background-color: rgba(16, 185, 129, 0.15); color: var(--bullish); padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: bold; border: 1px solid var(--bullish); }
+
+        .section-title {
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin: 20px 0 10px 0;
+            font-weight: bold;
+        }
+
+        /* Active Alerts Panel Layout */
+        .alerts-panel {
+            background-color: var(--alert-bg);
+            border: 1px dashed var(--accent);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px;
+            min-height: 60px;
+        }
+
+        .no-alerts {
+            grid-column: 1 / -1;
+            text-align: center;
+            color: var(--text-muted);
+            line-height: 60px;
+            font-style: italic;
+        }
+
+        .alert-card {
+            background-color: var(--bg-card);
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            padding: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+        .alert-card.buy { border-color: var(--bullish); }
+        .alert-card.sell { border-color: var(--bearish); }
+
+        .alert-info h4 { margin: 0; font-size: 18px; letter-spacing: 0.5px; }
+        .alert-info p { margin: 4px 0 0 0; font-size: 12px; color: var(--text-muted); }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 8px;
+        }
+
+        th {
+            color: var(--text-muted);
+            text-align: center;
+            padding: 12px;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        th:first-child { text-align: left; }
+
+        tr { background-color: var(--bg-card); transition: transform 0.2s; }
+        tr:hover { transform: scale(1.002); }
+
+        td {
+            padding: 14px;
+            text-align: center;
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 600;
+        }
+        td:first-child {
+            border-left: 1px solid var(--border-color);
+            border-top-left-radius: 8px;
+            border-bottom-left-radius: 8px;
+            text-align: left;
+            font-size: 16px;
+        }
+        td:last-child {
+            border-right: 1px solid var(--border-color);
+            border-top-right-radius: 8px;
+            border-bottom-right-radius: 8px;
+        }
+
+        .matrix-box {
+            display: inline-block;
+            width: 50px;
+            padding: 6px 0;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 12px;
+            color: #FFF;
+        }
+        .box-bull { background-color: var(--bullish); }
+        .box-bear { background-color: var(--bearish); }
+        .box-neu { background-color: var(--neutral); }
+
+        .setup-badge {
+            background-color: rgba(59, 130, 246, 0.1);
+            color: var(--accent);
+            border: 1px solid var(--accent);
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        .setup-neutral {
+            background-color: rgba(100, 116, 139, 0.1);
+            color: var(--text-muted);
+            border: 1px solid var(--neutral);
+        }
+
+        .signal-badge {
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .sig-buy { background-color: rgba(16, 185, 129, 0.2); color: var(--bullish); border: 1px solid var(--bullish); }
+        .sig-sell { background-color: rgba(239, 68, 68, 0.2); color: var(--bearish); border: 1px solid var(--bearish); }
+        .sig-none { color: var(--text-muted); font-weight: normal; }
+
+        .flash-badge {
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 13px;
+            animation: pulse 1s infinite alternate;
+        }
+        @keyframes pulse {
+            0% { opacity: 0.6; transform: scale(0.95); }
+            100% { opacity: 1; transform: scale(1.05); }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div>
+            <h1>TrendScanner</h1>
+            <div style="color: var(--text-muted); font-size: 13px; margin-top: 4px;">TDI Confluence Core Pipeline</div>
+        </div>
+        <div class="status-badge" id="clock">Connecting...</div>
+    </header>
+
+    <div class="section-title">🚨 Active Signal Notifications</div>
+    <div class="alerts-panel" id="active-alerts-container">
+        <div class="no-alerts">Scanning data fields... No active trigger setups detected.</div>
+    </div >
+
+    <div class="section-title">📊 Complete Market Asset Matrix</div>
+    <table>
+        <thead>
+            <tr>
+                <th>Asset Symbol</th>
+                <th>M5 (T1)</th>
+                <th>M30 (T2)</th>
+                <th>H4 (T3)</th>
+                <th>D1 (T4)</th>
+                <th>Current Structure</th>
+                <th>Action Signal</th>
+                <th>Last Update</th>
+            </tr>
+        </thead>
+        <tbody id="matrix-rows">
+        </tbody>
+    </table>
+
+    <script>
+        function playChime(isBuy) {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) return;
+                const ctx = new AudioContext();
+                
+                const osc1 = ctx.createOscillator();
+                const gain1 = ctx.createGain();
+                osc1.type = 'sine';
+                osc1.frequency.setValueAtTime(isBuy ? 523.25 : 392.00, ctx.currentTime);
+                gain1.gain.setValueAtTime(0.15, ctx.currentTime);
+                gain1.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+                osc1.connect(gain1);
+                gain1.connect(ctx.destination);
+                osc1.start();
+                osc1.stop(ctx.currentTime + 0.4);
+
+                setTimeout(() => {
+                    const osc2 = ctx.createOscillator();
+                    const gain2 = ctx.createGain();
+                    osc2.type = 'sine';
+                    osc2.frequency.setValueAtTime(isBuy ? 659.25 : 329.63, ctx.currentTime);
+                    gain2.gain.setValueAtTime(0.12, ctx.currentTime);
+                    gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+                    osc2.connect(gain2);
+                    gain2.connect(ctx.destination);
+                    osc2.start();
+                    osc2.stop(ctx.currentTime + 0.5);
+                }, 120);
+
+            } catch (e) {
+                console.log("Audio play blocked pending user interaction click.");
+            }
+        }
+
+        let knownActiveSignals = new Set();
+
+        setInterval(() => {
+            document.getElementById('clock').innerText = `Live | ${new Date().toLocaleTimeString()}`;
+        }, 1000);
+
+        async function fetchMatrixData() {
+            try {
+                const response = await fetch('/api/matrix-data');
+                const data = await response.json();
+                
+                const tbody = document.getElementById('matrix-rows');
+                const alertsContainer = document.getElementById('active-alerts-container');
+                
+                tbody.innerHTML = '';
+                
+                if(data.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 30px;">Waiting for data transmission from MT5...</td></tr>`;
+                    alertsContainer.innerHTML = `<div class="no-alerts">Waiting for server sync...</div>`;
+                    return;
+                }
+
+                data.sort((a, b) => a.symbol.localeCompare(b.symbol));
+
+                let activeAlertsHTML = '';
+                let currentSignalsList = new Set();
+
+                data.forEach(item => {
+                    const row = document.createElement('tr');
+                    
+                    if (item.signal === 'BUY' || item.signal === 'SELL') {
+                        const signalKey = `${item.symbol}_${item.signal}_${item.setup}`;
+                        currentSignalsList.add(signalKey);
+
+                        if (!knownActiveSignals.has(signalKey)) {
+                            playChime(item.signal === 'BUY');
+                        }
+
+                        const cardClass = item.signal === 'BUY' ? 'alert-card buy' : 'alert-card sell';
+                        const badgeStyle = item.signal === 'BUY' ? 'background-color: var(--bullish); color: #FFF;' : 'background-color: var(--bearish); color: #FFF;';
+                        
+                        activeAlertsHTML += `
+                            <div class="${cardClass}">
+                                <div class="alert-info">
+                                    <h4>${item.symbol}</h4>
+                                    <p>${item.setup}</p>
+                                </div>
+                                <div class="flash-badge" style="${badgeStyle}">${item.signal}</div>
+                            </div>
+                        `;
+                    }
+
+                    const getBoxHTML = (val) => {
+                        if(val === 1) return `<span class="matrix-box box-bull">BULL</span>`;
+                        if(val === -1) return `<span class="matrix-box box-bear">BEAR</span>`;
+                        return `<span class="matrix-box box-neu">NEUT</span>`;
+                    };
+
+                    const setupClass = item.setup === 'NEUTRAL' ? 'setup-badge setup-neutral' : 'setup-badge';
+
+                    let signalHTML = `<span class="signal-badge sig-none">Wait</span>`;
+                    if(item.signal === 'BUY') signalHTML = `<span class="signal-badge sig-buy">BUY</span>`;
+                    if(item.signal === 'SELL') signalHTML = `<span class="signal-badge sig-sell">SELL</span>`;
+
+                    row.innerHTML = `
+                        <td>${item.symbol}</td>
+                        <td>${getBoxHTML(item.t1)}</td>
+                        <td>${getBoxHTML(item.t2)}</td>
+                        <td>${getBoxHTML(item.t3)}</td>
+                        <td>${getBoxHTML(item.t4)}</td>
+                        <td><span class="${setupClass}">${item.setup}</span></td>
+                        <td>${signalHTML}</td>
+                        <td style="color: var(--text-muted); font-size: 13px;">${item.lastUpdated}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+
+                knownActiveSignals = currentSignalsList;
+
+                if (activeAlertsHTML === '') {
+                    alertsContainer.innerHTML = `<div class="no-alerts">No active triggers detected. System streaming running clean.</div>`;
+                } else {
+                    alertsContainer.innerHTML = activeAlertsHTML;
+                }
+
+            } catch (error) {
+                console.error("Dashboard engine refresh step failure:", error);
+            }
+        }
+
+        setInterval(fetchMatrixData, 1000);
+        fetchMatrixData();
+    </script>
+</body>
+</html>
